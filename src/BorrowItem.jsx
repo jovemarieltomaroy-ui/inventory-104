@@ -149,7 +149,7 @@ const BorrowItem = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const itemsRes = await fetch('http://localhost:5000/api/inventory');
+        const itemsRes = await fetch('https://inventory-104.onrender.com/api/inventory');
         const itemsData = await itemsRes.json();
         const availableItems = itemsData.filter(i => i.availableQty > 0 || !isUser); 
         const formattedItems = availableItems.map(i => ({
@@ -158,7 +158,7 @@ const BorrowItem = () => {
         }));
         setItemOptions(formattedItems);
 
-        const refRes = await fetch('http://localhost:5000/api/inventory/references');
+        const refRes = await fetch('https://inventory-104.onrender.com/api/inventory/references');
         const refData = await refRes.json();
         setCommitteeOptions(refData.committees);
       } catch (error) {
@@ -195,7 +195,7 @@ const BorrowItem = () => {
     };
 
     try {
-        const response = await fetch('http://localhost:5000/api/borrowing', {
+        const response = await fetch('https://inventory-104.onrender.com/api/borrowing', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

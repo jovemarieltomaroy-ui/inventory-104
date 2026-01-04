@@ -147,7 +147,7 @@ const SettingsPage = () => {
 
   const [toast, setToast] = useState({ message: "", type: "" });
 
-  const API_URL = "http://localhost:5000/api";
+  const API_URL = "https://inventory-104.onrender.com/api";
 
   useEffect(() => {
     // --- UPDATED SECURITY CHECK ---

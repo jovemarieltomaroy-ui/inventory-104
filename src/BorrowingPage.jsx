@@ -71,7 +71,7 @@ const BorrowingPage = () => {
 
   const fetchTransactions = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/borrowing?_t=${Date.now()}`);
+      const response = await fetch(`https://inventory-104.onrender.com/api/borrowing?_t=${Date.now()}`);
       const data = await response.json();
       
       if (Array.isArray(data)) {
@@ -115,7 +115,7 @@ const BorrowingPage = () => {
     if (action === 'return') endpoint = `/api/borrowing/return/${id}`;
 
     try {
-        const res = await fetch(`http://localhost:5000${endpoint}`, {
+        const res = await fetch(`https://inventory-104.onrender.com${endpoint}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID: user.id, roleID: user.roleId })

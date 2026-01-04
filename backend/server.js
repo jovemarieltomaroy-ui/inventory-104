@@ -8,8 +8,17 @@ const bcrypt = require('bcrypt');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// --- CORS CONFIGURATION (Keep this one only!) ---
+app.use(cors({
+    origin: [
+        "http://localhost:5173/",                  // Your local frontend
+        "https://inventory-104.onrender.com" // REPLACE THIS with your actual Render Frontend link
+    ],
+    credentials: true
+}));
+
 app.use(bodyParser.json());
+// app.use(express.json()); // You can use this OR bodyParser, you don't need both. bodyParser is fine.
 
 // --- DATABASE CONNECTION ---
 const pool = mysql.createPool({

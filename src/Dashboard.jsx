@@ -133,10 +133,10 @@ function Dashboard() {
             const t = new Date().getTime();
 
             const [statsRes, activityRes, notifRes] = await Promise.all([
-                fetch(`http://localhost:5000/api/dashboard/stats?t=${t}`),
+                fetch(`https://inventory-104.onrender.com/api/dashboard/stats?t=${t}`),
                 // IMPORTANT: Passing currentUser.id here ensures the backend filters the logs
-                fetch(`http://localhost:5000/api/dashboard/activity/${currentUser.id}?t=${t}`), 
-                fetch(`http://localhost:5000/api/notifications/${currentUser.id}?t=${t}`) 
+                fetch(`https://inventory-104.onrender.com/api/dashboard/activity/${currentUser.id}?t=${t}`), 
+                fetch(`https://inventory-104.onrender.com/api/notifications/${currentUser.id}?t=${t}`) 
             ]);
 
             if (statsRes.ok) setDashboardStats(await statsRes.json());
@@ -145,7 +145,7 @@ function Dashboard() {
 
             // Only fetch Low Stock if user is NOT a regular User
             if (currentUser.roleId !== ROLES.USER) {
-                const stockRes = await fetch(`http://localhost:5000/api/dashboard/low-stock?t=${t}`);
+                const stockRes = await fetch(`https://inventory-104.onrender.com/api/dashboard/low-stock?t=${t}`);
                 if (stockRes.ok) setLowStockItems(await stockRes.json());
             }
 
@@ -177,7 +177,7 @@ function Dashboard() {
     if (!currentUser?.id) return;
 
     try {
-      await fetch(`http://localhost:5000/api/notifications/mark-all-read/${currentUser.id}`, { 
+      await fetch(`https://inventory-104.onrender.com/api/notifications/mark-all-read/${currentUser.id}`, { 
         method: 'PUT' 
       });
     } catch (error) {
@@ -189,7 +189,7 @@ function Dashboard() {
   const handleNotificationClick = async (id) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
     try {
-      await fetch(`http://localhost:5000/api/notifications/read/${id}`, { method: 'PUT' });
+      await fetch(`https://inventory-104.onrender.com/api/notifications/read/${id}`, { method: 'PUT' });
     } catch (error) {
        console.error("Failed to mark as read:", error);
     }

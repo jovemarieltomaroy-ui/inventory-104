@@ -97,7 +97,7 @@ const EditItem = () => {
 
     const fetchOptions = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/inventory/references');
+            const res = await fetch('https://inventory-104.onrender.com/api/inventory/references');
             if (res.ok) {
                 const data = await res.json();
                 setCommitteeOptions(data.committees);
@@ -144,7 +144,7 @@ const EditItem = () => {
 
         const targetId = id || itemData.id;
 
-        const res = await fetch(`http://localhost:5000/api/inventory/${targetId}`, {
+        const res = await fetch(`https://inventory-104.onrender.com/api/inventory/${targetId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
