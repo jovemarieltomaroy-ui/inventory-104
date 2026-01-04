@@ -10,10 +10,7 @@ const PORT = process.env.PORT || 5000;
 
 // --- CORS CONFIGURATION (Keep this one only!) ---
 app.use(cors({
-    origin: [
-        "http://localhost:5173/",                  // Your local frontend
-        "https://inventory-104.onrender.com" // REPLACE THIS with your actual Render Frontend link
-    ],
+    origin: true,       // 'true' means allow any origin that asks
     credentials: true
 }));
 
