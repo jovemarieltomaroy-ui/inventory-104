@@ -103,10 +103,8 @@ const SettingsPage = () => {
         if (refsRes.ok) {
             const refsData = await refsRes.json();
             
-            // --- FIX: Map specific IDs (unitID / committeeID) to 'id' ---
             const mapRef = (item) => {
                 if (typeof item === 'string') return { id: null, name: item };
-                // Prioritize the specific database IDs
                 const validId = item.unitID || item.committeeID || item.id || null;
                 const validName = item.label || item.name || item;
                 return { id: validId, name: validName };
@@ -244,10 +242,10 @@ const SettingsPage = () => {
 
   const handleDeleteDefinition = async (endpoint, list, setList, item) => {
     try {
-      // 1. Identify valid ID or fallback to Name
+      // 1. Determine Identifier
       const identifier = item.id ? item.id : item.name;
       
-      // 2. Build URL (Use ID if present, otherwise encode Name)
+      // 2. Build URL
       const urlParam = item.id ? item.id : encodeURIComponent(item.name);
       const url = `${API_URL}/settings/${endpoint}/${urlParam}`;
       
@@ -261,9 +259,8 @@ const SettingsPage = () => {
 
       const data = await res.json();
       if (data.success) {
-        // --- FIX: Filter Logic to prevent deleting everything ---
+        // --- FIX: Filter Logic ---
         setList(prev => prev.filter(i => {
-             // If we have an ID, delete by ID. If not, delete by Name.
              if (item.id) return i.id !== item.id;
              return i.name !== item.name;
         }));
@@ -288,11 +285,11 @@ const SettingsPage = () => {
     return (
       <div className="settings-card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div className="card-header" style={{ marginBottom: '15px' }}>{icon}<h3>{title}</h3></div>
+        {/* ADDED no-scrollbar class here */}
         <div className="no-scrollbar" style={{ flex: 1, maxHeight: '200px', overflowY: 'auto', border: '1px solid #eee', borderRadius: '6px', marginBottom: '15px' }}>
           {data.map((item, idx) => (
             <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', borderBottom: '1px solid #f9f9f9', fontSize: '14px' }}>
               <span>{item.name}</span>
-              {/* Pass the WHOLE item object so we can check both ID and Name */}
               <button 
                 onClick={() => handleDeleteDefinition(endpoint, data, setData, item)} 
                 style={{ background: 'none', border: 'none', color: '#d32f2f', cursor: 'pointer' }}
@@ -373,7 +370,9 @@ const SettingsPage = () => {
           <div className="settings-card">
             <div className="card-header"><FaDatabase className="card-icon" /><h3>Item Threshold Rules</h3></div>
             <div className="search-box-wrapper"><FaSearch className="search-icon"/><input type="text" placeholder="Search item..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /></div>
-            <div className="rules-container" style={{ border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden', maxHeight: '400px', overflowY: 'auto' }}>
+            
+            {/* ADDED no-scrollbar class here */}
+            <div className="rules-container no-scrollbar" style={{ border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden', maxHeight: '400px', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr', padding: '10px 15px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #eee', fontWeight: '600', fontSize: '13px', color: '#555', position: 'sticky', top: 0 }}>
                 <div>Item Name</div><div>Category</div><div style={{ textAlign: 'center' }}>Low Stock Alert</div>
               </div>
@@ -447,6 +446,17 @@ const SettingsPage = () => {
       )}
 
       {toast.message && <div style={{ position: 'fixed', bottom: '24px', right: '24px', backgroundColor: '#333', color: 'white', padding: '12px 24px', borderRadius: '8px', zIndex: 1100, display: 'flex', alignItems: 'center', gap: '12px' }}>{toast.type === 'error' ? <FaExclamationTriangle style={{color:'#f44336'}}/> : <FaCheck style={{color:'#4caf50'}}/>}{toast.message}</div>}
+      
+      {/* CSS to Hide Scrollbars */}
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+      `}</style>
     </div>
   );
 };
