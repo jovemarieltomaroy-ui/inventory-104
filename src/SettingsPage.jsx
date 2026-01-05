@@ -51,7 +51,6 @@ const SettingsPage = () => {
   const [loading, setLoading] = useState(true);
 
   const [users, setUsers] = useState([]);
-  // FIX: Initialize as arrays to hold objects {id, name}
   const [units, setUnits] = useState([]); 
   const [committees, setCommittees] = useState([]);
   
@@ -104,7 +103,7 @@ const SettingsPage = () => {
         const refsRes = await fetch(`${API_URL}/inventory/references`);
         if (refsRes.ok) {
             const refsData = await refsRes.json();
-            // FIX: Store Object {id, name} instead of just string to allow Deletion by ID
+            // Store Objects {id, name}
             setUnits((refsData.units || []).map(u => ({ id: u.id, name: u.label || u.name })));
             setCommittees((refsData.committees || []).map(c => ({ id: c.id, name: c.label || c.name })));
         }
@@ -226,7 +225,6 @@ const SettingsPage = () => {
       
       if(data.success) {
           setToast({ message: `${name} added.`, type: 'success' });
-          // Ideally we use data.insertId, but for now we refresh to get the ID
           fetchSettingsData();
       } else {
         setToast({ message: data.message || "Error adding item", type: 'error' });
@@ -236,14 +234,20 @@ const SettingsPage = () => {
     }
   };
 
-  // FIX: Modified to accept ID instead of Name
+  // --- FIX: Updated Delete Function to send JSON Body ---
   const handleDeleteDefinition = async (endpoint, list, setList, id, name) => {
     try {
-      // FIX: URL uses ID now
-      const url = `${API_URL}/settings/${endpoint}/${id}?roleID=${currentUser.roleId}`;
-      const res = await fetch(url, { method: 'DELETE' });
+      // 1. Remove query params from URL
+      const url = `${API_URL}/settings/${endpoint}/${id}`;
       
-      // Safety check for non-JSON responses (404/500)
+      const res = await fetch(url, { 
+          method: 'DELETE',
+          // 2. Add Content-Type Header
+          headers: { 'Content-Type': 'application/json' },
+          // 3. Send roleID in the Body
+          body: JSON.stringify({ roleID: currentUser.roleId })
+      });
+      
       if (!res.ok) {
          throw new Error("Server returned " + res.status);
       }
@@ -275,9 +279,7 @@ const SettingsPage = () => {
         <div className="no-scrollbar" style={{ flex: 1, maxHeight: '200px', overflowY: 'auto', border: '1px solid #eee', borderRadius: '6px', marginBottom: '15px' }}>
           {data.map((item, idx) => (
             <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', borderBottom: '1px solid #f9f9f9', fontSize: '14px' }}>
-              {/* FIX: Render item.name */}
               <span>{item.name}</span>
-              {/* FIX: Pass item.id to delete function */}
               <button 
                 onClick={() => handleDeleteDefinition(endpoint, data, setData, item.id, item.name)} 
                 style={{ background: 'none', border: 'none', color: '#d32f2f', cursor: 'pointer' }}
@@ -311,7 +313,6 @@ const SettingsPage = () => {
                 <td data-label="Status"><span className={`status-pill ${user.status ? user.status.toLowerCase() : 'inactive'}`}>{user.status || 'Inactive'}</span></td>
                 <td data-label="Last Login" style={{ color: '#666', fontSize: '13px' }}>{formatDate(user.lastLogin)}</td>
                 <td data-label="Actions">
-                  {/* FIX: Added Inline Styles to ensure visibility regardless of CSS file */}
                   <button 
                     onClick={() => initiateDeleteUser(user)}
                     style={{ background: 'none', border: 'none', color: '#d32f2f', cursor: 'pointer', fontSize: '16px' }}
@@ -353,7 +354,6 @@ const SettingsPage = () => {
           <div className="centered-cards-container">
             <ConfigCard title="Units of Measure" icon={<FaRuler className="card-icon" color="#005de9ff"/>} data={units} setData={setUnits} placeholder="New Unit..." endpoint="units" />
             <ConfigCard title="Committees" icon={<FaUsersCog className="card-icon" color="#003b95ff"/>} data={committees} setData={setCommittees} placeholder="New Committee..." endpoint="committees" />
-            {/* Note: Item Types endpoint might differ, left as is for now */}
             <ConfigCard title="Item Types" icon={<FaDatabase className="card-icon" color="#008f7aff"/>} data={[]} setData={() => {}} placeholder="Types managed in inventory" endpoint="types" />
           </div>
 
