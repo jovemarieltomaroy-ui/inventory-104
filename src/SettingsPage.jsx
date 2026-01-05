@@ -18,112 +18,29 @@ const roleIdToName = (id) => {
   return "User";
 };
 
-// --- INLINE STYLES FOR MODAL FIX ---
+// --- INLINE STYLES ---
 const modalStyles = {
   overlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
+    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000,
   },
   content: {
-    backgroundColor: '#fff',
-    width: '90%',
-    maxWidth: '400px',
-    borderRadius: '8px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
-    overflow: 'hidden',
-    animation: 'fadeIn 0.2s ease-in-out',
-    display: 'flex',
-    flexDirection: 'column',
+    backgroundColor: '#fff', width: '90%', maxWidth: '400px', borderRadius: '8px',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column',
   },
   header: {
-    backgroundColor: '#f8f9fa',
-    padding: '15px 20px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: '1px solid #eee',
+    backgroundColor: '#f8f9fa', padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #eee',
   },
-  headerTitle: {
-    margin: 0,
-    fontSize: '1.2rem',
-    color: '#333',
-  },
-  closeBtn: {
-    background: 'none',
-    border: 'none',
-    fontSize: '1.5rem',
-    color: '#666',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  body: {
-    padding: '20px',
-  },
-  formGroup: {
-    marginBottom: '15px',
-    display: 'flex',
-    flexDirection: 'column', 
-    gap: '6px',
-    textAlign: 'left',
-  },
-  label: {
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    color: '#555',
-  },
-  input: {
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    fontSize: '1rem',
-    outline: 'none',
-    width: '100%',
-    boxSizing: 'border-box', 
-  },
-  footer: {
-    padding: '15px 20px',
-    backgroundColor: '#f8f9fa',
-    borderTop: '1px solid #eee',
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '10px',
-  },
-  btnCancel: {
-    backgroundColor: '#fff',
-    border: '1px solid #ddd',
-    color: '#555',
-    padding: '8px 16px',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontWeight: '500',
-  },
-  btnSubmit: {
-    backgroundColor: '#00497a',
-    border: 'none',
-    color: 'white',
-    padding: '8px 16px',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontWeight: '500',
-  },
-  btnDelete: {
-    backgroundColor: '#d32f2f',
-    border: 'none',
-    color: 'white',
-    padding: '8px 16px',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontWeight: '500',
-  }
+  headerTitle: { margin: 0, fontSize: '1.2rem', color: '#333' },
+  closeBtn: { background: 'none', border: 'none', fontSize: '1.5rem', color: '#666', cursor: 'pointer', display: 'flex', alignItems: 'center' },
+  body: { padding: '20px' },
+  formGroup: { marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' },
+  label: { fontSize: '0.9rem', fontWeight: '600', color: '#555' },
+  input: { padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '1rem', outline: 'none', width: '100%', boxSizing: 'border-box' },
+  footer: { padding: '15px 20px', backgroundColor: '#f8f9fa', borderTop: '1px solid #eee', display: 'flex', justifyContent: 'flex-end', gap: '10px' },
+  btnCancel: { backgroundColor: '#fff', border: '1px solid #ddd', color: '#555', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
+  btnSubmit: { backgroundColor: '#00497a', border: 'none', color: 'white', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' },
+  btnDelete: { backgroundColor: '#d32f2f', border: 'none', color: 'white', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }
 };
 
 const SettingsPage = () => {
@@ -134,8 +51,10 @@ const SettingsPage = () => {
   const [loading, setLoading] = useState(true);
 
   const [users, setUsers] = useState([]);
-  const [units, setUnits] = useState([]);
+  // FIX: Initialize as arrays to hold objects {id, name}
+  const [units, setUnits] = useState([]); 
   const [committees, setCommittees] = useState([]);
+  
   const [inventoryItems, setInventoryItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -150,8 +69,6 @@ const SettingsPage = () => {
   const API_URL = "https://inventory-backend-yfyn.onrender.com/api";
 
   useEffect(() => {
-    // --- UPDATED SECURITY CHECK ---
-    // If not logged in OR NOT SUPERADMIN, kick them out.
     if (!currentUser.id || currentUser.roleId !== ROLES.SUPERADMIN) {
       navigate("/dashboard");
       return;
@@ -183,13 +100,13 @@ const SettingsPage = () => {
       }));
       setUsers(normalizedUsers);
 
-      // We don't need to check role here anymore because only Superadmin reaches this point
       try {
         const refsRes = await fetch(`${API_URL}/inventory/references`);
         if (refsRes.ok) {
             const refsData = await refsRes.json();
-            setUnits((refsData.units || []).map(u => u.label ?? u.name ?? u));
-            setCommittees((refsData.committees || []).map(c => c.label ?? c.name ?? c));
+            // FIX: Store Object {id, name} instead of just string to allow Deletion by ID
+            setUnits((refsData.units || []).map(u => ({ id: u.id, name: u.label || u.name })));
+            setCommittees((refsData.committees || []).map(c => ({ id: c.id, name: c.label || c.name })));
         }
       } catch (err) { setUnits([]); setCommittees([]); }
 
@@ -219,7 +136,6 @@ const SettingsPage = () => {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-    // Double check locally just in case
     if (currentUser.roleId !== ROLES.SUPERADMIN) {
         setToast({ message: "Access Denied.", type: 'error' });
         return;
@@ -298,34 +214,50 @@ const SettingsPage = () => {
     }
   };
 
-  const handleAddDefinition = async (endpoint, list, setList, item) => {
-    if (!item || list.includes(item)) return;
+  const handleAddDefinition = async (endpoint, list, setList, name) => {
+    if (!name || list.some(i => i.name === name)) return;
     try {
-      await fetch(`${API_URL}/settings/${endpoint}`, {
+      const res = await fetch(`${API_URL}/settings/${endpoint}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: item, roleID: currentUser.roleId })
+          body: JSON.stringify({ name: name, roleID: currentUser.roleId })
       });
-      setList(prev => [...prev, item]);
-      setToast({ message: `${item} added.`, type: 'success' });
+      const data = await res.json();
+      
+      if(data.success) {
+          setToast({ message: `${name} added.`, type: 'success' });
+          // Ideally we use data.insertId, but for now we refresh to get the ID
+          fetchSettingsData();
+      } else {
+        setToast({ message: data.message || "Error adding item", type: 'error' });
+      }
     } catch (error) { 
       setToast({ message: "Error adding item.", type: 'error' }); 
     }
   };
 
-  const handleDeleteDefinition = async (endpoint, list, setList, item) => {
+  // FIX: Modified to accept ID instead of Name
+  const handleDeleteDefinition = async (endpoint, list, setList, id, name) => {
     try {
-      const url = `${API_URL}/settings/${endpoint}/${encodeURIComponent(item)}?roleID=${currentUser.roleId}`;
+      // FIX: URL uses ID now
+      const url = `${API_URL}/settings/${endpoint}/${id}?roleID=${currentUser.roleId}`;
       const res = await fetch(url, { method: 'DELETE' });
+      
+      // Safety check for non-JSON responses (404/500)
+      if (!res.ok) {
+         throw new Error("Server returned " + res.status);
+      }
+
       const data = await res.json();
       if (data.success) {
-        setList(prev => prev.filter(i => i !== item));
-        setToast({ message: `${item} removed.`, type: 'success' });
+        setList(prev => prev.filter(i => i.id !== id));
+        setToast({ message: `${name} removed.`, type: 'success' });
       } else {
         setToast({ message: data.message || "Error removing item.", type: 'error' }); 
       }
     } catch (error) { 
-      setToast({ message: "Connection error.", type: 'error' }); 
+      console.error(error);
+      setToast({ message: "Connection error or ID missing.", type: 'error' }); 
     }
   };
 
@@ -343,8 +275,16 @@ const SettingsPage = () => {
         <div className="no-scrollbar" style={{ flex: 1, maxHeight: '200px', overflowY: 'auto', border: '1px solid #eee', borderRadius: '6px', marginBottom: '15px' }}>
           {data.map((item, idx) => (
             <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', borderBottom: '1px solid #f9f9f9', fontSize: '14px' }}>
-              <span>{item}</span>
-              <button onClick={() => handleDeleteDefinition(endpoint, data, setData, item)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}><FaTrash size={12}/></button>
+              {/* FIX: Render item.name */}
+              <span>{item.name}</span>
+              {/* FIX: Pass item.id to delete function */}
+              <button 
+                onClick={() => handleDeleteDefinition(endpoint, data, setData, item.id, item.name)} 
+                style={{ background: 'none', border: 'none', color: '#d32f2f', cursor: 'pointer' }}
+                title="Delete"
+              >
+                <FaTrash size={12}/>
+              </button>
             </div>
           ))}
         </div>
@@ -371,7 +311,14 @@ const SettingsPage = () => {
                 <td data-label="Status"><span className={`status-pill ${user.status ? user.status.toLowerCase() : 'inactive'}`}>{user.status || 'Inactive'}</span></td>
                 <td data-label="Last Login" style={{ color: '#666', fontSize: '13px' }}>{formatDate(user.lastLogin)}</td>
                 <td data-label="Actions">
-                  <button className="action-btn-icon delete" onClick={() => initiateDeleteUser(user)}><FaTrash /></button>
+                  {/* FIX: Added Inline Styles to ensure visibility regardless of CSS file */}
+                  <button 
+                    onClick={() => initiateDeleteUser(user)}
+                    style={{ background: 'none', border: 'none', color: '#d32f2f', cursor: 'pointer', fontSize: '16px' }}
+                    title="Delete User"
+                  >
+                    <FaTrash />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -406,6 +353,7 @@ const SettingsPage = () => {
           <div className="centered-cards-container">
             <ConfigCard title="Units of Measure" icon={<FaRuler className="card-icon" color="#005de9ff"/>} data={units} setData={setUnits} placeholder="New Unit..." endpoint="units" />
             <ConfigCard title="Committees" icon={<FaUsersCog className="card-icon" color="#003b95ff"/>} data={committees} setData={setCommittees} placeholder="New Committee..." endpoint="committees" />
+            {/* Note: Item Types endpoint might differ, left as is for now */}
             <ConfigCard title="Item Types" icon={<FaDatabase className="card-icon" color="#008f7aff"/>} data={[]} setData={() => {}} placeholder="Types managed in inventory" endpoint="types" />
           </div>
 
@@ -429,7 +377,7 @@ const SettingsPage = () => {
         </div>
       )}
 
-      {/* --- ADD USER MODAL WITH INLINE STYLES --- */}
+      {/* --- ADD USER MODAL --- */}
       {showModal && (
         <div style={modalStyles.overlay}>
           <div style={modalStyles.content}>
@@ -471,7 +419,7 @@ const SettingsPage = () => {
         </div>
       )}
 
-      {/* --- DELETE MODAL WITH INLINE STYLES --- */}
+      {/* --- DELETE MODAL --- */}
       {showDeleteModal && (
         <div style={modalStyles.overlay}>
           <div style={modalStyles.content}>
