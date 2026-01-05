@@ -977,7 +977,6 @@ app.delete('/api/users/:id', async (req, res) => {
 // Helper: Updated to accept 'req' and check for Superadmin privileges
 const handleDefinition = async (req, res, sql, params, successMsg) => {
     // 1. Get Role ID (from body for POST/PUT, or query string for DELETE)
-    // NOTE: Frontend must send roleID (e.g., ?roleID=1 for deletes)
     const requestorRole = req.body.roleID || req.query.roleID || req.query.requestorRoleID;
 
     // 2. Strict Check: Only Superadmin (ID 1) allowed
@@ -994,7 +993,7 @@ const handleDefinition = async (req, res, sql, params, successMsg) => {
     } catch (err) { 
         console.error("Settings DB Error:", err);
         
-        // Bonus: Handle constraint violations (e.g., trying to delete 'Pieces' while items still use it)
+        // Handle foreign key constraint violations
         if (err.code === 'ER_ROW_IS_REFERENCED_2') {
             return res.status(400).json({ success: false, message: 'Cannot delete: This option is currently being used by an active item.' });
         }
@@ -1008,8 +1007,9 @@ app.post('/api/settings/committees', (req, res) => {
     handleDefinition(req, res, 'INSERT INTO committees (committeeName) VALUES (?)', [req.body.name], 'Committee Added');
 });
 
-app.delete('/api/settings/committees/:name', (req, res) => {
-    handleDefinition(req, res, 'DELETE FROM committees WHERE committeeName = ?', [req.params.name], 'Committee Deleted');
+// FIX: Changed :name to :id and SQL to use committeeID
+app.delete('/api/settings/committees/:id', (req, res) => {
+    handleDefinition(req, res, 'DELETE FROM committees WHERE committeeID = ?', [req.params.id], 'Committee Deleted');
 });
 
 // --- UNITS ---
@@ -1017,8 +1017,9 @@ app.post('/api/settings/units', (req, res) => {
     handleDefinition(req, res, 'INSERT INTO units (unitName) VALUES (?)', [req.body.name], 'Unit Added');
 });
 
-app.delete('/api/settings/units/:name', (req, res) => {
-    handleDefinition(req, res, 'DELETE FROM units WHERE unitName = ?', [req.params.name], 'Unit Deleted');
+// FIX: Changed :name to :id and SQL to use unitID
+app.delete('/api/settings/units/:id', (req, res) => {
+    handleDefinition(req, res, 'DELETE FROM units WHERE unitID = ?', [req.params.id], 'Unit Deleted');
 });
 
 // --- TYPES ---
@@ -1026,8 +1027,9 @@ app.post('/api/settings/types', (req, res) => {
     handleDefinition(req, res, 'INSERT INTO types (typeName) VALUES (?)', [req.body.name], 'Type Added');
 });
 
-app.delete('/api/settings/types/:name', (req, res) => {
-    handleDefinition(req, res, 'DELETE FROM types WHERE typeName = ?', [req.params.name], 'Type Deleted');
+// FIX: Changed :name to :id and SQL to use typeID
+app.delete('/api/settings/types/:id', (req, res) => {
+    handleDefinition(req, res, 'DELETE FROM types WHERE typeID = ?', [req.params.id], 'Type Deleted');
 });
 
 // --- THRESHOLD MANAGEMENT ---
