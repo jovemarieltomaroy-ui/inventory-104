@@ -68,7 +68,7 @@ const InventoryPage = () => {
   
   const fetchReferences = async () => {
     try {
-        const response = await fetch('https://inventory-104.onrender.com/api/inventory/references');
+        const response = await fetch('https://inventory-backend-yfyn.onrender.com/api/inventory/references');
         if (response.ok) {
             const data = await response.json();
             setCommitteeOptions(data.committees); 
@@ -80,7 +80,7 @@ const InventoryPage = () => {
 
   const fetchItems = async () => {
     try {
-        const response = await fetch('https://inventory-104.onrender.com/api/inventory');
+        const response = await fetch('https://inventory-backend-yfyn.onrender.com/api/inventory');
         if (response.ok) {
             const data = await response.json();
             setItems(data);
@@ -126,7 +126,7 @@ const InventoryPage = () => {
             userID: user.id 
         };
 
-        const res = await fetch(`https://inventory-104.onrender.com/api/inventory/${itemToDelete.id}`, {
+        const res = await fetch(`https://inventory-backend-yfyn.onrender.com/api/inventory/${itemToDelete.id}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload) 

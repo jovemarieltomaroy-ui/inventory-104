@@ -21,7 +21,7 @@ const Notifications = () => {
         if (!currentUser?.id) return;
         try {
             // ?t=timestamp to force the browser to get fresh data, not cached data
-            const res = await fetch(`https://inventory-104.onrender.com/api/notifications/all/${currentUser.id}?t=${new Date().getTime()}`, {
+            const res = await fetch(`https://inventory-backend-yfyn.onrender.com/api/notifications/all/${currentUser.id}?t=${new Date().getTime()}`, {
                 headers: { 
                     'Cache-Control': 'no-cache, no-store, must-revalidate',
                     'Pragma': 'no-cache',
@@ -44,7 +44,7 @@ const Notifications = () => {
             setAllNotifications(updated);
 
             // Send command to Database
-            await fetch(`https://inventory-104.onrender.com/api/notifications/mark-all-read/${currentUser.id}`, {
+            await fetch(`https://inventory-backend-yfyn.onrender.com/api/notifications/mark-all-read/${currentUser.id}`, {
                 method: 'PUT'
             });
             

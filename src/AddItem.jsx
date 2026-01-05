@@ -99,7 +99,7 @@ const AddItem = () => {
 
     const fetchOptions = async () => {
         try {
-            const res = await fetch('https://inventory-104.onrender.com');
+            const res = await fetch('https://inventory-backend-yfyn.onrender.com');
             if (res.ok) {
                 const data = await res.json();
                 setCommitteeOptions(data.committees);
@@ -143,7 +143,7 @@ const AddItem = () => {
     };
 
     try {
-        const res = await fetch('https://inventory-104.onrender.com', {
+        const res = await fetch('https://inventory-backend-yfyn.onrender.com', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

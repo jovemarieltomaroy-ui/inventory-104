@@ -34,7 +34,7 @@ const LoginPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://inventory-104.onrender.com/api/login', {
+      const response = await fetch('https://inventory-backend-yfyn.onrender.com/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -81,7 +81,7 @@ const LoginPage = () => {
       setIsLoading(true);
 
       try {
-          const response = await fetch('https://inventory-104.onrender.com/api/auth/first-login', {
+          const response = await fetch('https://inventory-backend-yfyn.onrender.com/api/auth/first-login', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

@@ -37,7 +37,7 @@ const HistoryPage = () => {
   const fetchHistory = async () => {
     try {
       // We pass the ID here. The BACKEND decides if we see 'all' or 'ours'.
-      const response = await fetch(`https://inventory-104.onrender.com/api/history/${currentUser.id}?_t=${Date.now()}`);
+      const response = await fetch(`https://inventory-backend-yfyn.onrender.com/api/history/${currentUser.id}?_t=${Date.now()}`);
       const data = await response.json();
       
       const formattedData = transformData(data);
