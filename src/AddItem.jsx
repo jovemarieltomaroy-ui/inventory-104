@@ -246,7 +246,13 @@ const AddItem = () => {
             /* THIS PUSHES THE FOOTER TO THE BOTTOM */
             flex: 1; 
             overflow-y: auto; /* Allow scroll if inputs are too many */
-            padding-bottom: 10px;
+            padding-bottom: 10px;-ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        /* HIDE SCROLLBAR FOR CHROME, SAFARI, OPERA */
+        .formBody::-webkit-scrollbar {
+            display: none;
         }
         
         .row { display: flex; gap: 15px; align-items: center; }
