@@ -73,7 +73,6 @@ const SettingsPage = () => {
       return;
     }
     fetchSettingsData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, currentUser.roleId, currentUser.id]);
 
   useEffect(() => {
@@ -103,9 +102,18 @@ const SettingsPage = () => {
         const refsRes = await fetch(`${API_URL}/inventory/references`);
         if (refsRes.ok) {
             const refsData = await refsRes.json();
-            // Store Objects {id, name}
-            setUnits((refsData.units || []).map(u => ({ id: u.id, name: u.label || u.name })));
-            setCommittees((refsData.committees || []).map(c => ({ id: c.id, name: c.label || c.name })));
+            
+            // --- FIX: Map specific IDs (unitID / committeeID) to 'id' ---
+            const mapRef = (item) => {
+                if (typeof item === 'string') return { id: null, name: item };
+                // Prioritize the specific database IDs
+                const validId = item.unitID || item.committeeID || item.id || null;
+                const validName = item.label || item.name || item;
+                return { id: validId, name: validName };
+            };
+            
+            setUnits((refsData.units || []).map(mapRef));
+            setCommittees((refsData.committees || []).map(mapRef));
         }
       } catch (err) { setUnits([]); setCommittees([]); }
 
@@ -234,34 +242,38 @@ const SettingsPage = () => {
     }
   };
 
-  // --- FIX: Updated Delete Function to send JSON Body ---
-  const handleDeleteDefinition = async (endpoint, list, setList, id, name) => {
+  const handleDeleteDefinition = async (endpoint, list, setList, item) => {
     try {
-      // 1. Remove query params from URL
-      const url = `${API_URL}/settings/${endpoint}/${id}`;
+      // 1. Identify valid ID or fallback to Name
+      const identifier = item.id ? item.id : item.name;
+      
+      // 2. Build URL (Use ID if present, otherwise encode Name)
+      const urlParam = item.id ? item.id : encodeURIComponent(item.name);
+      const url = `${API_URL}/settings/${endpoint}/${urlParam}`;
       
       const res = await fetch(url, { 
           method: 'DELETE',
-          // 2. Add Content-Type Header
           headers: { 'Content-Type': 'application/json' },
-          // 3. Send roleID in the Body
           body: JSON.stringify({ roleID: currentUser.roleId })
       });
       
-      if (!res.ok) {
-         throw new Error("Server returned " + res.status);
-      }
+      if (!res.ok) throw new Error("Server returned " + res.status);
 
       const data = await res.json();
       if (data.success) {
-        setList(prev => prev.filter(i => i.id !== id));
-        setToast({ message: `${name} removed.`, type: 'success' });
+        // --- FIX: Filter Logic to prevent deleting everything ---
+        setList(prev => prev.filter(i => {
+             // If we have an ID, delete by ID. If not, delete by Name.
+             if (item.id) return i.id !== item.id;
+             return i.name !== item.name;
+        }));
+        setToast({ message: `${item.name} removed.`, type: 'success' });
       } else {
         setToast({ message: data.message || "Error removing item.", type: 'error' }); 
       }
     } catch (error) { 
       console.error(error);
-      setToast({ message: "Connection error or ID missing.", type: 'error' }); 
+      setToast({ message: "Connection error.", type: 'error' }); 
     }
   };
 
@@ -280,8 +292,9 @@ const SettingsPage = () => {
           {data.map((item, idx) => (
             <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', borderBottom: '1px solid #f9f9f9', fontSize: '14px' }}>
               <span>{item.name}</span>
+              {/* Pass the WHOLE item object so we can check both ID and Name */}
               <button 
-                onClick={() => handleDeleteDefinition(endpoint, data, setData, item.id, item.name)} 
+                onClick={() => handleDeleteDefinition(endpoint, data, setData, item)} 
                 style={{ background: 'none', border: 'none', color: '#d32f2f', cursor: 'pointer' }}
                 title="Delete"
               >
