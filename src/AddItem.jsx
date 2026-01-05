@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check, Search } from 'lucide-react'; // Added Search import
 
 // --- RBAC CONSTANTS ---
 const ROLES = {
@@ -9,56 +9,71 @@ const ROLES = {
   USER: 3
 };
 
-// --- CUSTOM DROPDOWN (UPDATED: Click Outside) ---
+// --- CUSTOM DROPDOWN (COPIED FROM BORROWITEM) ---
 const CustomDropdown = ({ options, placeholder, value, onChange, className }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const wrapperRef = useRef(null); // Ref to track the component
+  const [searchTerm, setSearchTerm] = useState("");
+  const wrapperRef = useRef(null);
 
-  // Handle click outside to close dropdown
   useEffect(() => {
     function handleClickOutside(event) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     }
-    // Bind the event listener
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      // Unbind the event listener on clean up
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [wrapperRef]);
 
   const handleSelect = (optionValue) => {
     onChange(optionValue);
     setIsOpen(false);
+    setSearchTerm(""); 
   };
 
-  const selectedLabel = options.find(opt => opt.value === value)?.label || placeholder;
+  // Safe check for options in case it's null/undefined
+  const safeOptions = options || [];
+
+  const filteredOptions = safeOptions.filter((opt) =>
+    opt.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const selectedLabel = safeOptions.find((opt) => opt.value === value)?.label || placeholder;
 
   return (
     <div className={`custom-select-container ${className || ''}`} ref={wrapperRef}>
-      <div 
-        className={`custom-select-trigger ${isOpen ? 'open' : ''}`} 
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: value ? '#333' : '#888' }}>
-            {selectedLabel}
+      <div className={`custom-select-trigger ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(!isOpen)}>
+        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: value ? '#1F2937' : '#9CA3AF' }}>
+            {value ? selectedLabel : placeholder}
         </span>
         <ChevronDown size={16} className={`arrow ${isOpen ? 'rotated' : ''}`} />
       </div>
+      
       {isOpen && (
         <div className="custom-options-list">
-          {options.map((option) => (
-            <div 
-              key={option.value} 
-              className={`custom-option ${value === option.value ? 'selected' : ''}`}
-              onClick={() => handleSelect(option.value)}
-            >
-              {option.label}
-              {value === option.value && <Check size={14} />}
-            </div>
-          ))}
+          <div className="dropdown-search-container" onClick={(e) => e.stopPropagation()}>
+            <Search size={14} color="#888" />
+            <input 
+                autoFocus 
+                type="text" 
+                placeholder="Search..." 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)} 
+                className="dropdown-search-input"
+            />
+          </div>
+          <div className="options-scroll-area">
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map((option) => (
+                <div key={option.value} className={`custom-option ${value === option.value ? 'selected' : ''}`} onClick={() => handleSelect(option.value)}>
+                  {option.label}
+                  {value === option.value && <Check size={14} className="check-icon" />}
+                </div>
+              ))
+            ) : (
+              <div className="no-results">No results found</div>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -99,12 +114,15 @@ const AddItem = () => {
 
     const fetchOptions = async () => {
         try {
-            const res = await fetch('https://inventory-backend-yfyn.onrender.com');
+            // Note: Ensure this URL points to the correct endpoint. 
+            // Based on BorrowItem, it might need to be '/api/inventory/references'
+            // But I kept your original URL here.
+            const res = await fetch('https://inventory-backend-yfyn.onrender.com/api/inventory/references'); 
             if (res.ok) {
                 const data = await res.json();
-                setCommitteeOptions(data.committees);
-                setTypeOptions(data.types);
-                setUnitOptions(data.units);
+                setCommitteeOptions(data.committees || []);
+                setTypeOptions(data.types || []);
+                setUnitOptions(data.units || []);
             }
         } catch (error) {
             console.error("Error fetching options:", error);
@@ -143,7 +161,7 @@ const AddItem = () => {
     };
 
     try {
-        const res = await fetch('https://inventory-backend-yfyn.onrender.com', {
+        const res = await fetch('https://inventory-backend-yfyn.onrender.com/api/inventory', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -197,11 +215,11 @@ const AddItem = () => {
                     />
                     
                     <CustomDropdown 
-                    className="col-1"
-                    options={committeeOptions}
-                    placeholder="Select Committee"
-                    value={committee}
-                    onChange={setCommittee}
+                        className="col-1"
+                        options={committeeOptions}
+                        placeholder="Select Committee"
+                        value={committee}
+                        onChange={setCommittee}
                     />
                 </div>
 
@@ -209,32 +227,32 @@ const AddItem = () => {
                 <div className="row">
                     {/* 1. Type */}
                     <CustomDropdown 
-                    className="col-2" 
-                    options={typeOptions}
-                    placeholder="Select Type"
-                    value={type}
-                    onChange={setType}
+                        className="col-2" 
+                        options={typeOptions}
+                        placeholder="Select Type"
+                        value={type}
+                        onChange={setType}
                     />
 
                     {/* 2. Unit */}
                     <CustomDropdown 
-                    className="col-1"
-                    options={unitOptions}
-                    placeholder="Unit"
-                    value={unit}
-                    onChange={setUnit}
+                        className="col-1"
+                        options={unitOptions}
+                        placeholder="Unit"
+                        value={unit}
+                        onChange={setUnit}
                     />
 
                     {/* 3. Quantity */}
                     <div className="quantity-wrapper col-small">
-                    <button type="button" onClick={decrement} className="qty-btn">-</button>
-                    <input 
-                        type="number" 
-                        value={quantity} 
-                        onChange={(e) => setQuantity(Number(e.target.value))}
-                        className="qty-input" 
-                    />
-                    <button type="button" onClick={increment} className="qty-btn">+</button>
+                        <button type="button" onClick={decrement} className="qty-btn">-</button>
+                        <input 
+                            type="number" 
+                            value={quantity} 
+                            onChange={(e) => setQuantity(Number(e.target.value))}
+                            className="qty-input" 
+                        />
+                        <button type="button" onClick={increment} className="qty-btn">+</button>
                     </div>
                 </div>
 
@@ -249,10 +267,10 @@ const AddItem = () => {
                     />
                     
                     <div className="buttonGroup col-auto"> 
-                    <button onClick={handleClose} className="cancelBtn">Cancel</button>
-                    <button onClick={handleSave} className="saveBtn" disabled={isSaving}>
-                        {isSaving ? "Saving..." : "Save"}
-                    </button>
+                        <button onClick={handleClose} className="cancelBtn">Cancel</button>
+                        <button onClick={handleSave} className="saveBtn" disabled={isSaving}>
+                            {isSaving ? "Saving..." : "Save"}
+                        </button>
                     </div>
                 </div>
             </>
@@ -270,20 +288,20 @@ const AddItem = () => {
             z-index: 1000; backdrop-filter: blur(3px);
         }
         .container { 
-            background: #E5E7EB; /* Light gray background like image */
+            background: white; 
             padding: 40px; 
             border-radius: 20px; 
             width: 90%; 
-            max-width: 700px; /* INCREASED WIDTH */
+            max-width: 700px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
             animation: slideUp 0.3s ease-out;
         }
         .title { 
             font-size: 24px; 
             font-weight: 800; 
-            color: #3B82F6; /* Blue title */
+            color: #3B82F6; 
             text-align: center; 
-            margin-top: 0px; /* REDUCED TOP MARGIN */
+            margin-top: 0px; 
             margin-bottom: 25px;
             text-transform: uppercase; 
         }
@@ -305,38 +323,57 @@ const AddItem = () => {
             font-size: 14px;
         }
         .text-input {
-            height: 45px; padding: 0 15px; border: none; border-radius: 8px;
+            height: 45px; padding: 0 15px; 
+            border: 1px solid #E5E7EB; /* Added border to match dropdown */
+            border-radius: 8px;
             font-size: 14px; outline: none; width: 100%; box-sizing: border-box;
+            color: #1F2937;
         }
-        .text-input:focus { box-shadow: 0 0 0 2px #3B82F6; }
+        .text-input:focus { border-color: #3B82F6; box-shadow: 0 0 0 2px rgba(59,130,246,0.1); }
 
-        /* --- DROPDOWN --- */
+        /* --- DROPDOWN (UPDATED CSS) --- */
         .custom-select-container { position: relative; width: 100%; }
         .custom-select-trigger { 
-            height: 45px; background: white; border-radius: 8px; 
+            height: 45px; 
+            background: white; 
+            border: 1px solid #E5E7EB; /* Changed to border */
+            border-radius: 8px; 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 0 15px; cursor: pointer; color: #333; font-size: 14px;
+            padding: 0 15px; cursor: pointer; color: #1F2937; font-size: 14px;
         }
-        .custom-select-trigger.open { border: 1px solid #3B82F6; }
+        .custom-select-trigger.open { border-color: #3B82F6; box-shadow: 0 0 0 2px rgba(59,130,246,0.1); }
         .arrow { color: #888; transition: transform 0.2s; }
         .arrow.rotated { transform: rotate(180deg); }
         
         .custom-options-list { 
             position: absolute; top: 110%; left: 0; right: 0; 
-            background: white; border-radius: 8px; padding: 5px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 50; 
-            max-height: 200px; overflow-y: auto;
+            background: white; 
+            border: 1px solid #E5E7EB;
+            border-radius: 8px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            z-index: 50; 
+            overflow: hidden;
+            animation: popIn 0.1s ease-out;
         }
+
+        .dropdown-search-container { padding: 10px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; gap: 8px; }
+        .dropdown-search-input { border: none; outline: none; width: 100%; font-size: 14px; color: #374151; }
+        
+        .options-scroll-area { max-height: 200px; overflow-y: auto; }
+        
         .custom-option { 
-            padding: 10px; cursor: pointer; font-size: 14px; border-radius: 4px;
+            padding: 10px 12px; cursor: pointer; font-size: 14px; color: #374151;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .custom-option:hover { background: #f3f4f6; }
-        .custom-option.selected { color: #3B82F6; font-weight: 600; }
+        .custom-option:hover { background: #F9FAFB; color: #111827; }
+        .custom-option.selected { background: #EFF6FF; color: #2563EB; font-weight: 500; }
+        .check-icon { color: #2563EB; }
+        .no-results { padding: 12px; text-align: center; color: #9CA3AF; font-size: 13px; }
 
         /* --- QUANTITY --- */
         .quantity-wrapper { 
             display: flex; align-items: center; background: white; 
+            border: 1px solid #E5E7EB;
             border-radius: 8px; height: 45px; overflow: hidden; padding: 0 5px;
         }
         .qty-btn { 
@@ -345,15 +382,15 @@ const AddItem = () => {
         }
         .qty-input { 
             flex: 1; border: none; text-align: center; font-weight: bold; font-size: 16px; outline: none; 
-            width: 40px; /* Fix input width */
+            width: 40px; 
+            color: #374151;
         }
-        /* Remove spinner from number input */
         .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
         /* --- BUTTONS --- */
         .buttonGroup { display: flex; gap: 10px; }
         .cancelBtn {
-             background: white; border: none; padding: 0 20px; height: 45px; 
+             background: white; border: 1px solid #D1D5DB; padding: 0 20px; height: 45px; 
              border-radius: 25px; cursor: pointer; font-weight: 600; color: #666;
         }
         .saveBtn {
@@ -363,6 +400,7 @@ const AddItem = () => {
         .saveBtn:hover { background: #1557b0; }
 
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
       `}</style>
     </div>
   );
