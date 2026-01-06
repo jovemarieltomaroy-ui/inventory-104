@@ -317,7 +317,7 @@ const SettingsPage = () => {
           <tbody>
             {data.map(user => (
               <tr key={user.id}>
-                <td data-label="Name"><div className="user-cell"><div className="user-avatar-small">{(user.name || 'U').charAt(0)}</div>{user.name}</div></td>
+                <td data-label="Name"><div className="user-cell" style={{textAlign: 'left'}}><div className="user-avatar-small">{(user.name || 'U').charAt(0)}</div>{user.name}</div></td>
                 <td  className="email-cell" data-label="Email">{user.email}</td>
                 <td data-label="Role"><span style={{ fontSize: '12px', fontWeight: 'bold', color: user.roleID === ROLES.SUPERADMIN ? '#d32f2f' : '#1976d2' }}>{roleIdToName(user.roleID)}</span></td>
                 <td data-label="Status"><span className={`status-pill ${user.status ? user.status.toLowerCase() : 'inactive'}`}>{user.status || 'Inactive'}</span></td>
