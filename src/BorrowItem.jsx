@@ -9,7 +9,7 @@ const ROLES = {
   USER: 3
 };
 
-// --- FEEDBACK MODAL (UPDATED: No Icons, Colored Text, Tighter Spacing) ---
+// --- FEEDBACK MODAL ---
 const FeedbackModal = ({ isOpen, type, message, onClose }) => {
   if (!isOpen) return null;
 
@@ -18,7 +18,6 @@ const FeedbackModal = ({ isOpen, type, message, onClose }) => {
   const title = isSuccess ? "Success" : "Notice";
   const btnText = isSuccess ? "Continue" : "Close";
   
-  // UPDATED THEME COLORS
   const theme = isSuccess 
     ? { text: '#059669', btn: '#059669', hover: '#047857' } // Green
     : { text: '#921a1d', btn: '#921a1d', hover: '#751417' }; // Red
@@ -27,7 +26,6 @@ const FeedbackModal = ({ isOpen, type, message, onClose }) => {
     <div className="overlay" style={{ zIndex: 2000 }} onClick={isSuccess ? undefined : onClose}>
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         
-        {/* HEADER: No Icon, Just Colored Text */}
         <div className="modal-header-group">
             <h3 className="modal-title" style={{ color: theme.text }}>
                 {title}
@@ -36,7 +34,6 @@ const FeedbackModal = ({ isOpen, type, message, onClose }) => {
 
         <p className="modal-desc">{message || "An unexpected issue occurred."}</p>
         
-        {/* ACTIONS: Positioned Bottom Right */}
         <div className="modal-actions-single">
           <button 
             className="btn-modal" 
@@ -124,11 +121,14 @@ const CustomDropdown = ({ options, placeholder, value, onChange, className }) =>
 // --- MAIN COMPONENT ---
 const BorrowItem = () => {
   const navigate = useNavigate();
-  // Mock user for example purposes; replace with your actual auth logic
+  // Mock user for example purposes
   const user = JSON.parse(localStorage.getItem('user')) || { roleId: 3, fullName: "Test User", id: 1 };
 
   const [selectedItem, setSelectedItem] = useState("");
-  const [borrower, setBorrower] = useState(user.roleId === ROLES.USER ? user.fullName : "");
+  
+  // UPDATED: Initialize to empty string (not automated)
+  const [borrower, setBorrower] = useState(""); 
+  
   const [committee, setCommittee] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [dateBorrowed, setDateBorrowed] = useState(new Date().toISOString().split('T')[0]);
@@ -151,6 +151,7 @@ const BorrowItem = () => {
       try {
         const itemsRes = await fetch('https://inventory-backend-yfyn.onrender.com/api/inventory');
         const itemsData = await itemsRes.json();
+        // Filter: If user, only show items with qty > 0. Admins can see all.
         const availableItems = itemsData.filter(i => i.availableQty > 0 || !isUser); 
         const formattedItems = availableItems.map(i => ({
            value: i.id,
@@ -239,7 +240,14 @@ const BorrowItem = () => {
           <div className="row">
             <div className="col-1">
                 <label className="field-label">Borrower Name</label>
-                <input type="text" placeholder="Enter full name" value={borrower} onChange={(e) => setBorrower(e.target.value)} className="text-input" disabled={isUser} />
+                {/* UPDATED: Removed disabled={isUser} to allow manual input */}
+                <input 
+                    type="text" 
+                    placeholder="Enter full name" 
+                    value={borrower} 
+                    onChange={(e) => setBorrower(e.target.value)} 
+                    className="text-input" 
+                />
             </div>
             <div className="col-1">
                 <label className="field-label">Committee</label>
@@ -362,12 +370,12 @@ const BorrowItem = () => {
         .check-icon { color: #2563EB; }
         .no-results { padding: 12px; text-align: center; color: #9CA3AF; font-size: 13px; }
 
-        /* --- UPDATED MODAL CSS --- */
+        /* --- MODAL CSS --- */
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
         
         .modal-container { 
             background: white; 
-            padding: 20px; /* Reduced from 24px */
+            padding: 20px;
             border-radius: 12px; 
             width: 90%; 
             max-width: 340px; 
@@ -380,7 +388,7 @@ const BorrowItem = () => {
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            margin-bottom: 8px; /* Reduced from 16px */
+            margin-bottom: 8px;
             width: 100%;
         }
         
@@ -388,22 +396,22 @@ const BorrowItem = () => {
             font-size: 20px; 
             font-weight: 700; 
             margin: 0; 
-            line-height: 1.1; /* Tighter line height */
+            line-height: 1.1; 
             text-align: center;
         }
         
         .modal-desc { 
             font-size: 14px; 
             color: #6B7280; 
-            margin-bottom: 16px; /* Reduced from 24px */
-            line-height: 1.3; /* Tighter line height */
+            margin-bottom: 16px;
+            line-height: 1.3;
         }
 
         .modal-actions-single {
             width: 100%;
             display: flex;
             justify-content: flex-end; 
-            margin-top: 16px; /* Reduced from 24px */
+            margin-top: 16px;
         }
 
         .btn-modal { 
