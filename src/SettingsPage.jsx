@@ -204,20 +204,42 @@ const SettingsPage = () => {
     }
   };
 
-  const handleUpdateItemThreshold = async (id, newVal) => {
-    const val = parseInt(newVal) || 0;
-    setInventoryItems(inventoryItems.map(item => item.id === id ? { ...item, threshold: val } : item));
+  // --- FIX START: Separated Typing from Saving ---
+
+  // 1. Updates the UI immediately so you can type
+  const handleLocalThresholdChange = (id, newVal) => {
+    setInventoryItems(prevItems => 
+        prevItems.map(item => item.id === id ? { ...item, threshold: newVal } : item)
+    );
+  };
+
+  // 2. Sends to Database ONLY when you click away (onBlur)
+  const saveThresholdToBackend = async (id, val) => {
+    const numericValue = val === "" ? 0 : parseInt(val);
+
     try {
-        await fetch(`${API_URL}/inventory/items/${id}/threshold`, {
+        const response = await fetch(`${API_URL}/inventory/items/${id}/threshold`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ threshold: val, roleID: currentUser.roleId })
+            body: JSON.stringify({ 
+                threshold: numericValue, 
+                roleID: currentUser.roleId 
+            })
         });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.message || "Server rejected update");
+        }
+
         setToast({ message: "Threshold saved.", type: "success" });
     } catch (error) {
-        setToast({ message: "Failed to save threshold.", type: 'error' });
+        console.error(error);
+        setToast({ message: "Failed to save. " + error.message, type: 'error' });
+        // Optional: reload data here if you want to revert changes
     }
   };
+  // --- FIX END ---
 
   const handleAddDefinition = async (endpoint, list, setList, name) => {
     if (!name || list.some(i => i.name === name)) return;
@@ -285,7 +307,6 @@ const SettingsPage = () => {
     return (
       <div className="settings-card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div className="card-header" style={{ marginBottom: '15px' }}>{icon}<h3>{title}</h3></div>
-        {/* ADDED no-scrollbar class here */}
         <div className="no-scrollbar" style={{ flex: 1, maxHeight: '200px', overflowY: 'auto', border: '1px solid #eee', borderRadius: '6px', marginBottom: '15px' }}>
           {data.map((item, idx) => (
             <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', borderBottom: '1px solid #f9f9f9', fontSize: '14px' }}>
@@ -371,7 +392,6 @@ const SettingsPage = () => {
             <div className="card-header"><FaDatabase className="card-icon" /><h3>Item Threshold Rules</h3></div>
             <div className="search-box-wrapper"><FaSearch className="search-icon"/><input type="text" placeholder="Search item..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /></div>
             
-            {/* ADDED no-scrollbar class here */}
             <div className="rules-container no-scrollbar" style={{ border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden', maxHeight: '400px', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr', padding: '10px 15px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #eee', fontWeight: '600', fontSize: '13px', color: '#555', position: 'sticky', top: 0 }}>
                 <div>Item Name</div><div>Category</div><div style={{ textAlign: 'center' }}>Low Stock Alert</div>
@@ -380,11 +400,24 @@ const SettingsPage = () => {
                 <div key={item.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr', padding: '12px 15px', borderBottom: '1px solid #eee', alignItems: 'center' }}>
                   <div style={{ color: '#333', fontWeight: '500' }}>{item.name}</div>
                   <div style={{ color: '#666', fontSize: '13px' }}><span style={{background: '#e3f2fd', color: '#1565c0', padding: '2px 8px', borderRadius: '4px', fontSize: '11px'}}>{item.category || '-'}</span></div>
-                  <div style={{ textAlign: 'center' }}><input type="number" value={item.threshold} onChange={(e) => handleUpdateItemThreshold(item.id, e.target.value)} style={{ width: '60px', padding: '6px', textAlign: 'center', border: '1px solid #ddd', borderRadius: '4px', fontWeight: 'bold', color: '#d32f2f' }} /></div>
+                  
+                  {/* --- FIX START: Input with onBlur --- */}
+                  <div style={{ textAlign: 'center' }}>
+                    <input 
+                        type="number" 
+                        value={item.threshold} 
+                        onChange={(e) => handleLocalThresholdChange(item.id, e.target.value)} 
+                        onBlur={(e) => saveThresholdToBackend(item.id, e.target.value)}
+                        style={{ width: '60px', padding: '6px', textAlign: 'center', border: '1px solid #ddd', borderRadius: '4px', fontWeight: 'bold', color: '#d32f2f' }} 
+                    />
+                  </div>
+                  {/* --- FIX END --- */}
+
                 </div>
               ))}
             </div>
-            <button className="save-btn" onClick={() => setToast({message:'Settings Saved', type:'success'})} style={{ marginTop: '20px' }}><FaSave /> Settings Saved</button>
+            {/* Note: This button is technically not needed anymore as we save on blur, but kept for UI consistency */}
+            <button className="save-btn" onClick={() => fetchSettingsData()} style={{ marginTop: '20px' }}><FaSave /> Refresh Data</button>
           </div>
         </div>
       )}
