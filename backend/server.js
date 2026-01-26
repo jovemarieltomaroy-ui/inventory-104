@@ -580,7 +580,18 @@ app.put('/api/inventory/:id', async (req, res) => {
         connection.release();
     }
 });
-
+// --- DYNAMIC FILTER ROUTE ---
+app.get('/api/inventory/types-list', async (req, res) => {
+    try {
+        // This gets the unique type names currently used or defined
+        const [rows] = await pool.execute('SELECT typeName FROM types ORDER BY typeName ASC');
+        const types = rows.map(r => r.typeName);
+        res.json(types);
+    } catch (error) {
+        console.error("Filter Fetch Error:", error);
+        res.status(500).json({ error: 'Failed to fetch type list' });
+    }
+});
 //          BORROWING ROUTES (RBAC)
 
 // 11. GET TRANSACTIONS
