@@ -153,18 +153,23 @@ app.post('/api/auth/first-login', async (req, res) => {
 
 //             DASHBOARD ROUTES
 
-// 2. DASHBOARD STATS
+// --- UPDATED DASHBOARD STATS ---
 app.get('/api/dashboard/stats', async (req, res) => {
     try {
-        const [itemsRes] = await pool.execute('SELECT SUM(quantity) as total FROM items');
+        // CHANGE: From SUM(quantity) to COUNT(*)
+        // This counts how many rows (unique products) exist in your table
+        const [itemsRes] = await pool.execute('SELECT COUNT(*) as total FROM items');
+        
         const [borrowedRes] = await pool.execute(
             'SELECT COUNT(*) as count FROM borrowing WHERE dateReturned IS NULL'
         );
+
         res.json({
             totalItems: itemsRes[0].total || 0,
             borrowedItems: borrowedRes[0].count || 0
         });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Failed to fetch stats' });
     }
 });
