@@ -175,7 +175,7 @@ app.get('/api/dashboard/activity/:userId', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch activities' });
     }
 });
-// --- 4. LOW STOCK (Updated to exclude Consumables) ---
+// --- 4. LOW STOCK (Strictly Services Only) ---
 app.get('/api/dashboard/low-stock', async (req, res) => {
     try {
         const sql = `
@@ -183,22 +183,20 @@ app.get('/api/dashboard/low-stock', async (req, res) => {
             FROM items i
             JOIN types t ON i.typeID = t.typeID
             WHERE t.classification = 'Services' 
-            AND i.quantity <= COALESCE(i.threshold, 0)
+            AND i.quantity <= i.threshold
             AND i.status != 'Removed'
         `;
         const [rows] = await pool.execute(sql);
         res.json(rows);
     } catch (err) {
-    console.error(err); // This prints to your VS Code terminal
-    res.status(500).json({ 
-        error: "Internal Server Error", 
-        details: err.message,
-        sqlState: err.sqlState 
-    });
-}
+        console.error("Low Stock Error:", err);
+        res.status(500).json({ 
+            error: "Internal Server Error", 
+            details: err.message 
+        });
+    }
 });
-
-// --- UPDATE THRESHOLD VIEW (Updated to ONLY show Services) ---
+// --- UPDATE THRESHOLD VIEW (Strictly Services Only) ---
 app.get('/api/inventory/items', async (req, res) => {
     try {
         const sql = `
@@ -211,6 +209,7 @@ app.get('/api/inventory/items', async (req, res) => {
         const [rows] = await pool.execute(sql);
         res.json(rows);
     } catch (error) {
+        console.error("Fetch Items Error:", error);
         res.status(500).json({ error: 'Failed to fetch items' });
     }
 });
