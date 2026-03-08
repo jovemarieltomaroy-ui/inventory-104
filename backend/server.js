@@ -175,19 +175,38 @@ app.get('/api/dashboard/activity/:userId', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch activities' });
     }
 });
-// 4. LOW STOCK
+// --- 4. LOW STOCK (Updated to exclude Consumables) ---
 app.get('/api/dashboard/low-stock', async (req, res) => {
     try {
         const sql = `
             SELECT i.itemName as name, i.quantity, t.typeName, i.threshold
             FROM items i
             JOIN types t ON i.typeID = t.typeID
-            WHERE t.classification = 'Services' AND i.quantity <= COALESCE(i.threshold, 0)
+            WHERE t.classification = 'Services' 
+            AND i.quantity <= COALESCE(i.threshold, 0)
+            AND i.status != 'Removed'
         `;
         const [rows] = await pool.execute(sql);
         res.json(rows);
     } catch (err) {
         res.status(500).json({ error: 'Database error checking low stock' });
+    }
+});
+
+// --- UPDATE THRESHOLD VIEW (Updated to ONLY show Services) ---
+app.get('/api/inventory/items', async (req, res) => {
+    try {
+        const sql = `
+            SELECT i.itemID as id, i.itemName as name, t.typeName as category, i.threshold
+            FROM items i
+            LEFT JOIN types t ON i.typeID = t.typeID
+            WHERE t.classification = 'Services'
+            ORDER BY i.itemName ASC
+        `;
+        const [rows] = await pool.execute(sql);
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch items' });
     }
 });
 
