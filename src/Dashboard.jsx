@@ -501,7 +501,7 @@ function Dashboard() {
                             <div className="low-stock-card">
                                 <div className="dashboard-section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <AlertCircle size={22} color="#E65100" /> 
-                                    Low Stock of Consumables
+                                    Low Stock of Services
                                 </div>
                                 <div className="stock-list-container">
                                     {lowStockItems.length > 0 ? (
