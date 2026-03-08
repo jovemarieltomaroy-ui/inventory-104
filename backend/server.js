@@ -181,18 +181,20 @@ app.get('/api/dashboard/low-stock', async (req, res) => {
         const sql = `
             SELECT i.itemName as name, i.quantity, t.typeName, i.threshold
             FROM items i
-            JOIN types t ON i.typeID = t.typeID
+            INNER JOIN types t ON i.typeID = t.typeID
             WHERE t.classification = 'Services' 
-            AND i.quantity <= i.threshold
             AND i.status != 'Removed'
+            AND i.quantity <= IFNULL(i.threshold, 0)
         `;
         const [rows] = await pool.execute(sql);
         res.json(rows);
     } catch (err) {
-        console.error("Low Stock Error:", err);
+        // This will now show you the EXACT SQL error in your browser/console
+        console.error("DETAILED SQL ERROR:", err);
         res.status(500).json({ 
-            error: "Internal Server Error", 
-            details: err.message 
+            error: "Database error checking low stock",
+            details: err.message,
+            code: err.code 
         });
     }
 });
