@@ -189,8 +189,13 @@ app.get('/api/dashboard/low-stock', async (req, res) => {
         const [rows] = await pool.execute(sql);
         res.json(rows);
     } catch (err) {
-        res.status(500).json({ error: 'Database error checking low stock' });
-    }
+    console.error(err); // This prints to your VS Code terminal
+    res.status(500).json({ 
+        error: "Internal Server Error", 
+        details: err.message,
+        sqlState: err.sqlState 
+    });
+}
 });
 
 // --- UPDATE THRESHOLD VIEW (Updated to ONLY show Services) ---
