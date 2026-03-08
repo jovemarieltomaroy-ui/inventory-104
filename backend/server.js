@@ -175,30 +175,26 @@ app.get('/api/dashboard/activity/:userId', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch activities' });
     }
 });
-// --- 4. LOW STOCK (Strictly Services Only) ---
 app.get('/api/dashboard/low-stock', async (req, res) => {
     try {
-        // We use a simple JOIN to get items that are Services
         const sql = `
             SELECT i.itemName as name, i.quantity, t.typeName, i.threshold
             FROM items i
             INNER JOIN types t ON i.typeID = t.typeID
             WHERE t.classification = 'Services' 
             AND i.status != 'Removed'
-            AND i.quantity <= i.threshold
+            AND i.quantity <= IFNULL(i.threshold, 0)
         `;
         
         const [rows] = await pool.execute(sql);
-        console.log("Low Stock Items Found:", rows.length); // Logs to your terminal
         res.json(rows);
 
     } catch (err) {
-        // This is the most important part: it tells you WHY it's failing
-        console.error("CRITICAL SQL ERROR:", err.message);
+        // This will print the EXACT error to your Render/VS Code console
+        console.error("SQL Execution Error:", err.message);
         res.status(500).json({ 
             error: "Database error", 
-            message: err.message,
-            hint: "Check if the column 'classification' exists in your types table" 
+            details: err.message 
         });
     }
 });
