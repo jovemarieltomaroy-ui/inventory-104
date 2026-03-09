@@ -186,17 +186,20 @@ const InventoryPage = () => {
                   <td className="code-cell">{item.code}</td>
                   <td className="name-cell">{item.name}</td>
                   <td>{item.committee}</td>
-                  <td><span 
-                  style={{
-                    color: '#000',           
-                    fontWeight: '500',   
-                    fontSize: '0.9rem',     
-                    padding: '0',           
-                    border: 'none',         
-                    backgroundColor: 'transparent' 
-                  }}
-                >
-                {item.type}
+                  <td>
+                  <span 
+                    style={{
+                      backgroundColor: '#f1f1f1', // Light grey background
+                      color: '#333333',           // Dark grey/black text
+                      padding: '4px 12px',        // Gives it that "pill" shape
+                      borderRadius: '20px',       // Makes the corners fully rounded
+                      fontSize: '0.8rem',         // Slightly smaller text
+                      fontWeight: '600',          // Semi-bold for readability
+                      display: 'inline-block',
+                      textTransform: 'capitalize' // Ensures it looks neat (e.g., "Assets")
+                    }}
+                  >
+                    {item.type}
                   </span>
                 </td>
                   <td style={{ fontWeight: '500' }}>{item.totalQty}</td>
@@ -222,6 +225,7 @@ const InventoryPage = () => {
       </div>
 
       <DeleteConfirmationModal isOpen={isDeleteModalOpen} onClose={() => setDeleteModalOpen(false)} onConfirm={confirmDelete} itemName={itemToDelete?.name || "Item"} />
+
     </div>
   );
 };
