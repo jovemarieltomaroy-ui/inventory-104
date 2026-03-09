@@ -191,7 +191,7 @@ const InventoryPage = () => {
                     style={{
                       color: '#1a1a1a',       // Deep black/grey text
                       fontWeight: '600',      // Makes it bold like the reference
-                      fontSize: '1rem',       // Standard readable size (increase to 1.1rem if you want it bigger)
+                      fontSize: '2rem',       // Standard readable size (increase to 1.1rem if you want it bigger)
                       backgroundColor: 'transparent', // Explicitly removes background
                       border: 'none',         // Explicitly removes border
                       padding: '0',           // Removes extra spacing around the text
