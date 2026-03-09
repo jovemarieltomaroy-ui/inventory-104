@@ -181,7 +181,7 @@ app.get('/api/dashboard/low-stock', async (req, res) => {
             SELECT i.itemName as name, i.quantity, t.typeName, i.threshold
             FROM items i
             INNER JOIN types t ON i.typeID = t.typeID
-            WHERE (t.classification = 'Services' OR t.classification = 'Consumable') 
+            WHERE (t.classification = 'Services') 
             AND i.quantity <= IFNULL(i.threshold, 0)
         `;
         
