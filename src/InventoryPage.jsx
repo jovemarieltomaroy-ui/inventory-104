@@ -210,6 +210,36 @@ const InventoryPage = () => {
       </div>
 
       <DeleteConfirmationModal isOpen={isDeleteModalOpen} onClose={() => setDeleteModalOpen(false)} onConfirm={confirmDelete} itemName={itemToDelete?.name || "Item"} />
+      <style>
+        {`
+        .type-badge {
+          padding: 4px 10px;
+          border-radius: 4px;
+          font-size: 0.85rem;
+          font-weight: 500;
+          display: inline-block;
+          border: 1px solid #ddd; /* Default light border */
+          background: #f5f5f5;    /* Default light background */
+          color: #333;            /* Default dark text */
+      }
+
+      /* 2. Target the 'assets' classification specifically */
+      .type-badge.assets, 
+      .type-badge.services {
+          border: 1px solid #333; /* Change purple border to Black/Dark Grey */
+          color: #000;            /* Ensure text is Black */
+          background: transparent; /* Remove any purple tint background */
+      }
+
+      /* Optional: Keep 'consumables' as a different color if you want */
+      .type-badge.consumable {
+          border: 1px solid #2e7d32;
+          color: #2e7d32;
+          background: #e8f5e9;
+      }
+        `
+        }
+      </style>
     </div>
   );
 };
