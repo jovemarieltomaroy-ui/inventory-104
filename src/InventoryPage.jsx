@@ -187,16 +187,15 @@ const InventoryPage = () => {
                   <td className="name-cell">{item.name}</td>
                   <td>{item.committee}</td>
                   <td>
-                  <span 
+                 <span 
                     style={{
-                      backgroundColor: 'none', // Light grey background
-                      color: '#333333',           // Dark grey/black text
-                      padding: '4px 12px',        // Gives it that "pill" shape
-                      borderRadius: '20px',       // Makes the corners fully rounded
-                      fontSize: '0.5rem',         // Slightly smaller text
-                      fontWeight: '800',          // Semi-bold for readability
-                      display: 'inline-block',
-                      textTransform: 'capitalize' // Ensures it looks neat (e.g., "Assets")
+                      color: '#1a1a1a',       // Deep black/grey text
+                      fontWeight: '600',      // Makes it bold like the reference
+                      fontSize: '1rem',       // Standard readable size (increase to 1.1rem if you want it bigger)
+                      backgroundColor: 'transparent', // Explicitly removes background
+                      border: 'none',         // Explicitly removes border
+                      padding: '0',           // Removes extra spacing around the text
+                      display: 'inline-block'
                     }}
                   >
                     {item.type}
