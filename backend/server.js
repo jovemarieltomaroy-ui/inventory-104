@@ -182,7 +182,6 @@ app.get('/api/dashboard/low-stock', async (req, res) => {
             FROM items i
             INNER JOIN types t ON i.typeID = t.typeID
             WHERE t.classification = 'Services' 
-            AND i.status != 'Removed'
             AND i.quantity <= IFNULL(i.threshold, 0)
         `;
         
