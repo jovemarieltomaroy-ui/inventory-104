@@ -193,8 +193,8 @@ const InventoryPage = () => {
                       color: '#333333',           // Dark grey/black text
                       padding: '4px 12px',        // Gives it that "pill" shape
                       borderRadius: '20px',       // Makes the corners fully rounded
-                      fontSize: '0.8rem',         // Slightly smaller text
-                      fontWeight: '600',          // Semi-bold for readability
+                      fontSize: '0.5rem',         // Slightly smaller text
+                      fontWeight: '800',          // Semi-bold for readability
                       display: 'inline-block',
                       textTransform: 'capitalize' // Ensures it looks neat (e.g., "Assets")
                     }}
