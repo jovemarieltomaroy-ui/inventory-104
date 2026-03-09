@@ -189,7 +189,7 @@ const InventoryPage = () => {
                   <td>
                   <span 
                     style={{
-                      backgroundColor: '#f1f1f1', // Light grey background
+                      backgroundColor: 'none', // Light grey background
                       color: '#333333',           // Dark grey/black text
                       padding: '4px 12px',        // Gives it that "pill" shape
                       borderRadius: '20px',       // Makes the corners fully rounded
